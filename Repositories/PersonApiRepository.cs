@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,6 +25,10 @@ namespace Repositories
             _cliente = client;
         }
 
+        // Pegar a lista da API
+        // Enviar quantidade de requisições
+        // Salvar quantidade requisições
+
         public async Task BulkInsert(List<UserPost> users)
         {
             var userSerialized = JsonConvert.SerializeObject(users);
@@ -35,11 +38,6 @@ namespace Repositories
 
         public async Task InsertListAsync(List<User> users, int personQuantity)
         {
-            // Pegar a lista da API
-            // Enviar quantidade de requisições
-            // Salvar quantidade requisições
-
-
 
             List<UserPost> allUsers = new List<UserPost>();
             List<UserPost> auxUsers = new List<UserPost>();
@@ -128,6 +126,11 @@ namespace Repositories
 
             Console.WriteLine(users.Length);
             return users.ToList();
+        }
+
+        public Task ProcessAsync(int totalLimit, int stepLimit)
+        {
+            throw new NotImplementedException();
         }
     }
 }

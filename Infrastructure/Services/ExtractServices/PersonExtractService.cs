@@ -15,6 +15,7 @@ namespace Infrastructure.Services.ExtractServices
     public class PersonExtractService : IPersonExtractService
     {
         private IPersonApiRepository _personApiRepository;
+
         public PersonExtractService(IPersonApiRepository personApiRepository)
         {
             _personApiRepository = personApiRepository;
@@ -24,12 +25,11 @@ namespace Infrastructure.Services.ExtractServices
         {
             PersonQuery personQuery = new PersonQuery();
             personQuery.Limit = totalLimit;
-            var persons = await _personApiRepository.GetListContentAsync(personQuery);
-
             Console.WriteLine("PESSOAS");
+            var persons = await _personApiRepository.GetListContentAsync(personQuery);
         }
 
-        private void SendRequest(User user)
+        private async void SendRequest(User user)
         {
             User usuario = new User();
             usuario.Cpf = user.Cpf;
@@ -37,18 +37,18 @@ namespace Infrastructure.Services.ExtractServices
             usuario.Sexo = user.Sexo;
             usuario.DataNascimento = user.DataNascimento;
 
-            var jsonContent = JsonConvert.SerializeObject(usuario);
-            var contentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-            await _cliente.PostAsync("person/create/", contentString);
+            await _personApiRepository.InsertContentAsync(user);
         }
-        private void SaveResponse()
+
+        private async void SaveResponse(List<User> users, int stepLimit)
         {
             List<UserPost> allUsers = new List<UserPost>();
             List<UserPost> auxUsers = new List<UserPost>();
             List<UserPost> threeUsers = new List<UserPost>();
 
             int counter = 1;
+            int count = 0;
+            int aux = 0;
 
             foreach (User user in users)
             {
@@ -72,7 +72,7 @@ namespace Infrastructure.Services.ExtractServices
                 }
                 else
                 {
-                    await BulkInsert(threeUsers);
+                    await _personApiRepository.BulkInsert(threeUsers);
                     Console.WriteLine($"{counter} - Inserindo valores");
                     counter++;
                     threeUsers.Clear();
@@ -81,7 +81,7 @@ namespace Infrastructure.Services.ExtractServices
                     if (aux == allUsers.Count)
                     {
                         threeUsers.Add(user);
-                        await BulkInsert(threeUsers);
+                        await _personApiRepository.BulkInsert(threeUsers);
                         Console.WriteLine($"{counter} - Inserindo valores");
                         counter++;
                         threeUsers.Clear();
@@ -94,78 +94,10 @@ namespace Infrastructure.Services.ExtractServices
                 count++;
             }
         }
-    }
 
         public Task ProcessAsync(int totalLimit, int stepLimit)
         {
-            Console.WriteLine("Extraindo a pessoa");
-
-            foreach (User user in persons)
-            {
-                Console.WriteLine($"Name:{user.Nome},\tCPF:{user.Cpf}");
-            }
-
-            Console.WriteLine("-------------");
-            int personQuantity = int.Parse(commands.GetNextCommand());
-            await getApiRepository.InsertListAsync(persons, personQuantity);
-
-            //getApiRepository.InsertList();
-
-            // Pegar a lista da API
-            // Enviar quantidade de requisições
-            // Salvar quantidade requisições
-
-
-
-            List<UserPost> allUsers = new List<UserPost>();
-            List<UserPost> auxUsers = new List<UserPost>();
-            List<UserPost> threeUsers = new List<UserPost>();
-            
-            int counter = 1;
-
-            foreach (User user in users)
-            {
-                UserPost usuario = new UserPost();
-                usuario.Cpf = user.Cpf;
-                usuario.Gender = user.Sexo;
-                usuario.Name = user.Nome;
-                usuario.BirthDate = user.DataNascimento;
-                allUsers.Add(usuario);
-            }
-
-            auxUsers.AddRange(allUsers);
-
-            foreach (UserPost user in allUsers)
-            {
-                aux++;
-                if (auxUsers.Count > 0 && count < stepLimit)
-                {
-                    threeUsers.Add(user);
-                    auxUsers.RemoveAt(0);
-                }
-                else
-                {
-                    await BulkInsert(threeUsers);
-                    Console.WriteLine($"{counter} - Inserindo valores");
-                    counter++;
-                    threeUsers.Clear();
-                    count = 0;
-
-                    if (aux == allUsers.Count)
-                    {
-                        threeUsers.Add(user);
-                        await BulkInsert(threeUsers);
-                        Console.WriteLine($"{counter} - Inserindo valores");
-                        counter++;
-                        threeUsers.Clear();
-                    }
-                    else
-                    {
-                        threeUsers.Add(user);
-                    }
-                }
-                count++;
-            }
+            throw new NotImplementedException();
         }
     }
 }
