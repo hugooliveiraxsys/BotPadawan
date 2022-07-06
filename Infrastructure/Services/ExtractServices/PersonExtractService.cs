@@ -21,23 +21,28 @@ namespace Infrastructure.Services.ExtractServices
             _personApiRepository = personApiRepository;
         }
 
-        private async void GetList(int totalLimit)
+        private async Task<List<User>> GetList(int totalLimit)
         {
             PersonQuery personQuery = new PersonQuery();
             personQuery.Limit = totalLimit;
             Console.WriteLine("PESSOAS");
             var persons = await _personApiRepository.GetListContentAsync(personQuery);
+            foreach(User person in persons)
+            {
+                Console.WriteLine("--"+person.Nome+"\t"+person.Cpf);
+            }                             
+            return persons;
         }
 
-        private async void SendRequest(User user)
+        private async Task SendRequest(User user)
         {
-            User usuario = new User();
+            UserPost usuario = new UserPost();
             usuario.Cpf = user.Cpf;
-            usuario.Nome = user.Nome;
-            usuario.Sexo = user.Sexo;
-            usuario.DataNascimento = user.DataNascimento;
+            usuario.Name = user.Nome;
+            usuario.Gender = user.Sexo;
+            usuario.BirthDate = user.DataNascimento;
 
-            await _personApiRepository.InsertContentAsync(user);
+            await _personApiRepository.InsertContentAsync(usuario);
         }
 
         private async void SaveResponse(List<User> users, int stepLimit)
@@ -72,7 +77,7 @@ namespace Infrastructure.Services.ExtractServices
                 }
                 else
                 {
-                    await _personApiRepository.BulkInsert(threeUsers);
+                    await _personApiRepository.BulkInsertAsync(threeUsers);
                     Console.WriteLine($"{counter} - Inserindo valores");
                     counter++;
                     threeUsers.Clear();
@@ -81,7 +86,7 @@ namespace Infrastructure.Services.ExtractServices
                     if (aux == allUsers.Count)
                     {
                         threeUsers.Add(user);
-                        await _personApiRepository.BulkInsert(threeUsers);
+                        await _personApiRepository.BulkInsertAsync(threeUsers);
                         Console.WriteLine($"{counter} - Inserindo valores");
                         counter++;
                         threeUsers.Clear();
@@ -95,9 +100,10 @@ namespace Infrastructure.Services.ExtractServices
             }
         }
 
-        public Task ProcessAsync(int totalLimit, int stepLimit)
+        public async Task ProcessAsync(int totalLimit, int stepLimit)
         {
-            throw new NotImplementedException();
+            var persons = await GetList(totalLimit);
+            await SendRequest(persons[0]);
         }
     }
 }

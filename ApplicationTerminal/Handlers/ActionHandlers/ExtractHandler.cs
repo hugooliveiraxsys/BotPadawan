@@ -1,14 +1,12 @@
 ﻿using ApplicationTerminal.Handlers.Base;
-using Infrastructure.Services.ExtractServices;
 using Infrastructure.Services.ExtractServices.Base.Interfaces;
 using Infrastructure.Services.ExtractServices.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Models.Entities;
 using Models.Extentions;
-using Models.Requests;
 using Repositories;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ApplicationTerminal.Handlers.ActionHandlers
 {
@@ -17,6 +15,8 @@ namespace ApplicationTerminal.Handlers.ActionHandlers
         private IExtractService _extractService;
 
         private IPersonExtractService _personExtractService;
+
+        private Startup _startup;
 
         public ExtractHandler()
         {

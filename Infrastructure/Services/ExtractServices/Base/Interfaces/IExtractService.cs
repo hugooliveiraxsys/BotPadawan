@@ -6,5 +6,6 @@ namespace Infrastructure.Services.ExtractServices.Base.Interfaces
     public interface IExtractService : IService
     {
         public Task ProcessAsync(int totalLimit, int stepLimit);
+
     }
 }

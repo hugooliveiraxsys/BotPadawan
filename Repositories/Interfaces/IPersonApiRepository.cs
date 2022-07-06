@@ -16,13 +16,9 @@ namespace Repositories.Interfaces
 
         public Task<List<User>> GetListContentAsync(PersonQuery personQuery);
 
-        public Task InsertContentAsync(User user);
+        public Task InsertContentAsync(UserPost user);
 
-        public Task InsertListAsync(List<User> users, int numeroPessoas);
-
-        public Task BulkInsert(List<UserPost> users);
-
-        public Task ProcessAsync(int totalLimit, int stepLimit);
+        public Task BulkInsertAsync(List<UserPost> users);
 
     }
 }

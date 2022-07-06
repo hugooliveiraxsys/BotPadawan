@@ -29,76 +29,16 @@ namespace Repositories
         // Enviar quantidade de requisições
         // Salvar quantidade requisições
 
-        public async Task BulkInsert(List<UserPost> users)
+        public async Task BulkInsertAsync(List<UserPost> users)
         {
             var userSerialized = JsonConvert.SerializeObject(users);
             var contentString = new StringContent(userSerialized, Encoding.UTF8, "application/json");
             await _cliente.PostAsync(_cliente.BaseAddress + "person/bulkmanual", contentString);
         }
 
-        public async Task InsertListAsync(List<User> users, int personQuantity)
+        public async Task InsertContentAsync(UserPost user)
         {
-
-            List<UserPost> allUsers = new List<UserPost>();
-            List<UserPost> auxUsers = new List<UserPost>();
-            List<UserPost> threeUsers = new List<UserPost>();
-            int times = personQuantity;
-            int counter = 1;
-
-            foreach (User user in users)
-            {
-                UserPost usuario = new UserPost();
-                usuario.Cpf = user.Cpf;
-                usuario.Gender = user.Sexo;
-                usuario.Name = user.Nome;
-                usuario.BirthDate = user.DataNascimento;
-                allUsers.Add(usuario);
-            }
-
-            auxUsers.AddRange(allUsers);
-
-            foreach (UserPost user in allUsers)
-            {
-                aux++;
-                if (auxUsers.Count > 0 && count < times)
-                {
-                    threeUsers.Add(user);
-                    auxUsers.RemoveAt(0);
-                }
-                else
-                {
-                    await BulkInsert(threeUsers);
-                    Console.WriteLine($"{counter} - Inserindo valores");
-                    counter++;
-                    threeUsers.Clear();
-                    count = 0;
-
-                    if (aux == allUsers.Count)
-                    {
-                        threeUsers.Add(user);
-                        await BulkInsert(threeUsers);
-                        Console.WriteLine($"{counter} - Inserindo valores");
-                        counter++;
-                        threeUsers.Clear();
-                    }
-                    else
-                    {
-                        threeUsers.Add(user);
-                    }
-                }
-                count++;
-            }
-        }
-
-        public async Task InsertContentAsync(User user)
-        {
-            User usuario = new User();
-            usuario.Cpf = user.Cpf;
-            usuario.Nome = user.Nome;
-            usuario.Sexo = user.Sexo;
-            usuario.DataNascimento = user.DataNascimento;
-
-            var jsonContent = JsonConvert.SerializeObject(usuario);
+            var jsonContent = JsonConvert.SerializeObject(user);
             var contentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
             await _cliente.PostAsync("person/create/", contentString);
@@ -126,11 +66,6 @@ namespace Repositories
 
             Console.WriteLine(users.Length);
             return users.ToList();
-        }
-
-        public Task ProcessAsync(int totalLimit, int stepLimit)
-        {
-            throw new NotImplementedException();
         }
     }
 }
