@@ -16,6 +16,8 @@ namespace Repositories.Interfaces
 
         public Task<List<User>> GetListContentAsync(PersonQuery personQuery);
 
+        public Task<List<string>> GetListCpfAsync (PersonQuery personQuery);
+
         public Task InsertContentAsync(UserPost user);
 
         public Task BulkInsertAsync(List<UserPost> users);

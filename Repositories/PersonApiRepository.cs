@@ -43,7 +43,7 @@ namespace Repositories
 
             await _cliente.PostAsync("person/create/", contentString);
         }
-
+        
         public async Task<User> GetContentAsync(string id)
         {
             var response = await _cliente.GetAsync("person/" + id);
@@ -52,6 +52,20 @@ namespace Repositories
             var user = JsonConvert.DeserializeObject<User>(content);
 
             return user;
+        }
+
+        public async Task<List<string>> GetListCpfAsync(PersonQuery personQuery)
+        {
+            string json = JsonConvert.SerializeObject(personQuery);
+
+            StringContent httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _cliente.PostAsync("person/list", httpContent);
+            var content = await response.Content.ReadAsStringAsync();
+            var cpfs = JsonConvert.DeserializeObject<string[]>(content);
+
+            //Console.WriteLine($"Lista CPFs lenght: {cpfs.Length}");
+            return cpfs.ToList();
         }
 
         public async Task<List<User>> GetListContentAsync(PersonQuery personQuery)

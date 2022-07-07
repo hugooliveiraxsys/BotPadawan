@@ -21,28 +21,31 @@ namespace Infrastructure.Services.ExtractServices
             _personApiRepository = personApiRepository;
         }
 
-        private async Task<List<User>> GetList(int totalLimit)
+        private async Task<List<string>> GetList(int totalLimit)
         {
+            // Buscar somente os CPFs, retorna uma lista de cpfs, lista strings
             PersonQuery personQuery = new PersonQuery();
             personQuery.Limit = totalLimit;
-            Console.WriteLine("PESSOAS");
-            var persons = await _personApiRepository.GetListContentAsync(personQuery);
-            foreach(User person in persons)
-            {
-                Console.WriteLine("--"+person.Nome+"\t"+person.Cpf);
-            }                             
-            return persons;
+            Console.WriteLine("CPFS");
+
+            var cpfList = await _personApiRepository.GetListCpfAsync(personQuery);
+            
+            return cpfList;
         }
 
         private async Task SendRequest(User user)
         {
-            UserPost usuario = new UserPost();
-            usuario.Cpf = user.Cpf;
-            usuario.Name = user.Nome;
-            usuario.Gender = user.Sexo;
-            usuario.BirthDate = user.DataNascimento;
+            // Vai buscar somente um CPF da lista que foi retornada
+            // Vai retornar o usuario a partir do CPF
 
-            await _personApiRepository.InsertContentAsync(usuario);
+            //UserPost usuario = new UserPost();
+            //usuario.Cpf = user.Cpf;
+            //usuario.Name = user.Nome;
+            //usuario.Gender = user.Sexo;
+            //usuario.BirthDate = user.DataNascimento;
+
+            //await _personApiRepository.InsertContentAsync(usuario);
+
         }
 
         private async void SaveResponse(List<User> users, int stepLimit)
@@ -102,8 +105,22 @@ namespace Infrastructure.Services.ExtractServices
 
         public async Task ProcessAsync(int totalLimit, int stepLimit)
         {
-            var persons = await GetList(totalLimit);
-            await SendRequest(persons[0]);
+            var cpfs = await GetList(totalLimit);
+            foreach(string cpf in cpfs)
+            {
+                Console.WriteLine(cpf);
+            }
+
+            //do
+            //{
+            //    List<> requests =
+            //    List <> responses =
+            //    //foreach
+            //    Response response = await SendRequest(persons.FirstOrDefault());
+            //    responses.Add(response);
+
+            //    //remover person
+            //} while (persons.Count != 0);
         }
     }
 }
