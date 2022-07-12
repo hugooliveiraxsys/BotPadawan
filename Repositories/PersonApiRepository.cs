@@ -1,5 +1,4 @@
-﻿using Models;
-using Models.Entities;
+﻿using Models.Entities;
 using Models.Requests;
 using Newtonsoft.Json;
 using Repositories.Interfaces;
@@ -15,8 +14,6 @@ namespace Repositories
     public class PersonApiRepository : IPersonApiRepository
     {
         public HttpClient _cliente = new HttpClient();
-        static int count = 0;
-        static int aux = 0;
 
         public PersonApiRepository()
         {
@@ -35,7 +32,6 @@ namespace Repositories
             var contentString = new StringContent(userSerialized, Encoding.UTF8, "application/json");
             await _cliente.PostAsync(_cliente.BaseAddress + "person/bulkmanual", contentString);
         }
-
         public async Task InsertContentAsync(UserPost user)
         {
             var jsonContent = JsonConvert.SerializeObject(user);
@@ -43,7 +39,6 @@ namespace Repositories
 
             await _cliente.PostAsync("person/create/", contentString);
         }
-        
         public async Task<User> GetContentAsync(string id)
         {
             var response = await _cliente.GetAsync("person/" + id);
@@ -53,21 +48,30 @@ namespace Repositories
 
             return user;
         }
+        public async Task<User> GetByCpfAsync(User user)
+        {
+            var json = JsonConvert.SerializeObject(user);
 
+            StringContent httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _cliente.PostAsync("person/by-cpf", httpContent);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var usuario = JsonConvert.DeserializeObject<User>(content);
+
+            return usuario;
+        }
         public async Task<List<string>> GetListCpfAsync(PersonQuery personQuery)
         {
             string json = JsonConvert.SerializeObject(personQuery);
 
             StringContent httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _cliente.PostAsync("person/list", httpContent);
+            var response = await _cliente.PostAsync("person/listCpf", httpContent);
             var content = await response.Content.ReadAsStringAsync();
             var cpfs = JsonConvert.DeserializeObject<string[]>(content);
-
-            //Console.WriteLine($"Lista CPFs lenght: {cpfs.Length}");
             return cpfs.ToList();
         }
-
         public async Task<List<User>> GetListContentAsync(PersonQuery personQuery)
         {
             string json = JsonConvert.SerializeObject(personQuery);

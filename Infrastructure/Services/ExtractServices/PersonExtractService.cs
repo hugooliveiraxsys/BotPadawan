@@ -1,13 +1,8 @@
 ﻿using Infrastructure.Services.ExtractServices.Interfaces;
 using Models.Entities;
 using Models.Requests;
-using Newtonsoft.Json;
-using Repositories;
 using Repositories.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Services.ExtractServices
@@ -26,101 +21,65 @@ namespace Infrastructure.Services.ExtractServices
             // Buscar somente os CPFs, retorna uma lista de cpfs, lista strings
             PersonQuery personQuery = new PersonQuery();
             personQuery.Limit = totalLimit;
-            Console.WriteLine("CPFS");
 
             var cpfList = await _personApiRepository.GetListCpfAsync(personQuery);
-            
             return cpfList;
         }
 
-        private async Task SendRequest(User user)
+        private async Task<User> SendRequest(string cpf)
         {
-            // Vai buscar somente um CPF da lista que foi retornada
-            // Vai retornar o usuario a partir do CPF
-
-            //UserPost usuario = new UserPost();
-            //usuario.Cpf = user.Cpf;
-            //usuario.Name = user.Nome;
-            //usuario.Gender = user.Sexo;
-            //usuario.BirthDate = user.DataNascimento;
-
-            //await _personApiRepository.InsertContentAsync(usuario);
-
+            //Vai buscar somente um CPF da lista que foi retornada
+            //Vai retornar o usuario a partir do CPF
+            User user = new User();
+            user.Cpf = cpf;
+;           return await _personApiRepository.GetByCpfAsync(user);
         }
 
-        private async void SaveResponse(List<User> users, int stepLimit)
+        private async Task SaveResponse(List<User> users)
         {
-            List<UserPost> allUsers = new List<UserPost>();
-            List<UserPost> auxUsers = new List<UserPost>();
-            List<UserPost> threeUsers = new List<UserPost>();
-
-            int counter = 1;
-            int count = 0;
-            int aux = 0;
-
+            List<UserPost> usersPost = new List<UserPost>();
             foreach (User user in users)
             {
-                UserPost usuario = new UserPost();
-                usuario.Cpf = user.Cpf;
-                usuario.Gender = user.Sexo;
-                usuario.Name = user.Nome;
-                usuario.BirthDate = user.DataNascimento;
-                allUsers.Add(usuario);
+                UserPost userPost = new UserPost();
+                userPost.Cpf = user.Cpf;
+                userPost.Name = user.Nome;
+                userPost.Gender = user.Sexo;
+                userPost.BirthDate = user.DataNascimento;
+                usersPost.Add(userPost);
             }
-
-            auxUsers.AddRange(allUsers);
-
-            foreach (UserPost user in allUsers)
-            {
-                aux++;
-                if (auxUsers.Count > 0 && count < stepLimit)
-                {
-                    threeUsers.Add(user);
-                    auxUsers.RemoveAt(0);
-                }
-                else
-                {
-                    await _personApiRepository.BulkInsertAsync(threeUsers);
-                    Console.WriteLine($"{counter} - Inserindo valores");
-                    counter++;
-                    threeUsers.Clear();
-                    count = 0;
-
-                    if (aux == allUsers.Count)
-                    {
-                        threeUsers.Add(user);
-                        await _personApiRepository.BulkInsertAsync(threeUsers);
-                        Console.WriteLine($"{counter} - Inserindo valores");
-                        counter++;
-                        threeUsers.Clear();
-                    }
-                    else
-                    {
-                        threeUsers.Add(user);
-                    }
-                }
-                count++;
-            }
+            await _personApiRepository.BulkInsertAsync(usersPost);
         }
 
         public async Task ProcessAsync(int totalLimit, int stepLimit)
         {
-            var cpfs = await GetList(totalLimit);
-            foreach(string cpf in cpfs)
+            List<string> CpfsRequests = await GetList(totalLimit);
+
+            List<User> usersResponses = new List<User>();
+            List<User> auxUsers = new List<User>();
+            int runCounter = 0, counter = 0;
+            
+            foreach (string Cpf in CpfsRequests)
             {
-                Console.WriteLine(cpf);
+                usersResponses.Add(await SendRequest(Cpf));
             }
 
-            //do
-            //{
-            //    List<> requests =
-            //    List <> responses =
-            //    //foreach
-            //    Response response = await SendRequest(persons.FirstOrDefault());
-            //    responses.Add(response);
-
-            //    //remover person
-            //} while (persons.Count != 0);
+            foreach(var user in usersResponses)
+            {
+                auxUsers.Add(user);
+                counter++;
+                runCounter++;
+                if (counter == stepLimit)
+                {
+                    counter = 0;
+                    await SaveResponse(auxUsers);
+                    auxUsers.Clear();
+                }
+                else if(runCounter > (totalLimit -1))
+                {
+                    await SaveResponse(auxUsers);
+                    auxUsers.Clear();
+                }
+            }
         }
     }
 }

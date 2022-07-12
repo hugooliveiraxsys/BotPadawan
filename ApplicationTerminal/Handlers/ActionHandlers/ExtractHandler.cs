@@ -25,7 +25,7 @@ namespace ApplicationTerminal.Handlers.ActionHandlers
             _personExtractService = _startup.Provider.GetRequiredService<IPersonExtractService>();
         }
 
-        public async override void HandleRequest(List<string> commands)
+        public async override void HandleRequest(List<string> commands)        
         {
             string extractCommand = commands.GetNextCommand();
             _handler = null;
